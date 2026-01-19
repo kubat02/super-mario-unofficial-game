@@ -25,8 +25,10 @@ class Game:
         self.game_over = False
         self.level_complete = False
         self.frame_count = 0
-        self.current_level = 1  # Mevcut seviye
-        self.max_level = self._count_available_levels()  # Otomatik seviye sayısı
+        self.current_world = 1  # Mevcut world
+        self.current_level = 1  # Mevcut level
+        self.max_worlds = 8  # 8 world var
+        self.world_levels = self._count_world_levels()  # Her world'deki level sayısı
         self.all_levels_complete = False  # Tüm seviyeler tamamlandı mı
         
         # Oyun bileşenleri
@@ -36,24 +38,28 @@ class Game:
         
         self._initialize_game()
     
-    def _count_available_levels(self):
-        """levels klasöründeki seviye dosyalarını say"""
+    def _count_world_levels(self):
+        """Her world'deki level sayısını hesapla"""
+        world_levels = {}
         levels_dir = os.path.join(os.path.dirname(__file__), 'levels')
-        if not os.path.exists(levels_dir):
-            return 1
         
-        max_level = 0
-        for filename in os.listdir(levels_dir):
-            if filename.startswith('level') and filename.endswith('.py'):
-                try:
-                    # level1.py -> 1, level2.py -> 2 vb.
-                    level_num = int(filename.replace('level', '').replace('.py', ''))
-                    if level_num > max_level:
-                        max_level = level_num
-                except ValueError:
-                    continue
+        for world_num in range(1, self.max_worlds + 1):
+            world_dir = os.path.join(levels_dir, f'world{world_num}')
+            if os.path.exists(world_dir):
+                level_count = 0
+                for filename in os.listdir(world_dir):
+                    if filename.startswith('level') and filename.endswith('.py'):
+                        try:
+                            level_num = int(filename.replace('level', '').replace('.py', ''))
+                            if level_num > level_count:
+                                level_count = level_num
+                        except ValueError:
+                            pass
+                world_levels[world_num] = level_count if level_count > 0 else 1
+            else:
+                world_levels[world_num] = 1  # Varsayılan
         
-        return max_level if max_level > 0 else 1
+        return world_levels
     
     def _initialize_game(self):
         """Oyunu başlat"""
@@ -71,13 +77,20 @@ class Game:
         # Level oluştur
         self.level = Level()
         try:
-            self.level.load_level(self.current_level)
-            print(f"Level {self.current_level} yüklendi!")
+            self.level.load_level(self.current_world, self.current_level)
+            print(f"World {self.current_world}, Level {self.current_level} yüklendi!")
         except Exception as e:
-            print(f"Level {self.current_level} yüklenemedi: {e}")
-            # Eğer seviye bulunamazsa level 1'i yükle
+            print(f"World {self.current_world}, Level {self.current_level} yüklenemedi: {e}")
+            # Eğer seviye bulunamazsa world 1 level 1'i yükle
+            self.current_world = 1
             self.current_level = 1
-            self.level.load_level(1)
+            self.level.load_level(1, 1)
+        
+        # Lakitu'lara player referansı ata
+        from enemies import Lakitu
+        for enemy in self.level.enemies:
+            if isinstance(enemy, Lakitu):
+                enemy.player_ref = self.player
         
         # Kamera oluştur
         self.camera = Camera(LEVEL_WIDTH, SCREEN_HEIGHT)
@@ -160,6 +173,17 @@ class Game:
         keys = pygame.key.get_pressed()
         for enemy in enemy_hits:
             if enemy.alive:
+                # Lakitu yumurta çarpışması kontrol et
+                if hasattr(enemy, 'get_eggs_for_collision'):
+                    for egg in enemy.get_eggs_for_collision():
+                        if egg.alive and self.player.rect.colliderect(egg.rect):
+                            # Yumurtaya çarptı - hasar al
+                            if not self.player.power_state.is_invincible():
+                                self.player.take_damage()
+                                egg.alive = False
+                                if self.player.lives <= 0:
+                                    self.game_over = True
+                
                 # Koopa kabuğu kontrolü
                 if hasattr(enemy, 'in_shell') and enemy.in_shell:
                     # Hareketsiz kabuk - tekmeleme
@@ -202,8 +226,14 @@ class Game:
                 elif self.player.vel_y > 0 and self.player.rect.bottom <= enemy.rect.centery:
                     result = enemy.stomp()
                     
+                    # Piranha veya Spiny - ezilmez!
+                    if result == 'no_stomp':
+                        # Hasar al
+                        self.player.take_damage()
+                        if self.player.lives <= 0:
+                            self.game_over = True
                     # Koopa kabuk oldu mu?
-                    if result == 'shell':
+                    elif result == 'shell':
                         points = self.player.stomp_enemy(enemy)
                         # Yukarı tuşuna basılıysa daha yüksek zıpla
                         if keys[pygame.K_UP]:
@@ -248,6 +278,19 @@ class Game:
         for sprite in self.level.all_sprites:
             self.screen.blit(sprite.image, self.camera.apply(sprite))
         
+        # Lakitu yumurtalarını çiz
+        from enemies import Lakitu
+        for enemy in self.level.enemies:
+            if isinstance(enemy, Lakitu) and hasattr(enemy, 'eggs'):
+                for egg in enemy.eggs:
+                    if egg.alive:
+                        self.screen.blit(egg.image, self.camera.apply(egg))
+        
+        # PowerUp'ları çiz (draw metodu ile)
+        camera_x = self.camera.camera.x
+        for powerup in self.level.powerups:
+            powerup.draw(self.screen, camera_x)
+        
         # Player'ı çiz (yanıp sönme efekti ile)
         if self.player.should_draw():
             self.screen.blit(self.player.image, self.camera.apply(self.player))
@@ -267,12 +310,12 @@ class Game:
         lives_text = self.font.render(f"MARIO  x{self.player.lives}", True, WHITE)
         score_text = self.font.render(f"SCORE", True, WHITE)
         score_value = self.font.render(f"{self.player.score:06d}", True, WHITE)
-        level_text = self.small_font.render(f"LEVEL {self.current_level}", True, WHITE)
+        world_text = self.small_font.render(f"WORLD {self.current_world}-{self.current_level}", True, WHITE)
         
         self.screen.blit(lives_text, (20, 20))
         self.screen.blit(score_text, (SCREEN_WIDTH - 200, 20))
         self.screen.blit(score_value, (SCREEN_WIDTH - 200, 50))
-        self.screen.blit(level_text, (SCREEN_WIDTH//2 - 40, 20))
+        self.screen.blit(world_text, (SCREEN_WIDTH//2 - 50, 20))
         
         # Güç durumu göstergesi
         power_text = ""
@@ -323,22 +366,30 @@ class Game:
             self.screen.blit(restart_text, (SCREEN_WIDTH//2 - 110, SCREEN_HEIGHT//2 + 20))
     
     def _load_next_level(self):
-        """Sonraki seviyeyi yükle"""
+        """Sonraki seviyeyi yükle (world sistemi)"""
+        # Önce level'i arttır
         self.current_level += 1
         
-        # Mevcut seviye sayısını yeniden kontrol et (yeni level eklenmişse)
-        self.max_level = self._count_available_levels()
+        # Bu world'de bu level var mı?
+        max_level_in_world = self.world_levels.get(self.current_world, 1)
         
-        if self.current_level > self.max_level:
-            # Tüm seviyeler tamamlandı
-            self.all_levels_complete = True
-            self.level_complete = False
-            print(f"Tüm {self.max_level} seviye tamamlandı!")
-        else:
-            # Sonraki seviyeyi yükle
-            self.level_complete = False
-            self.frame_count = 0
-            self._initialize_game()
+        if self.current_level > max_level_in_world:
+            # Bu world'ün levelleri bitti - sonraki world'e geç
+            self.current_world += 1
+            self.current_level = 1
+            
+            if self.current_world > self.max_worlds:
+                # Tüm worldler tamamlandı!
+                self.all_levels_complete = True
+                self.level_complete = False
+                print(f"Tüm {self.max_worlds} world tamamlandı! Oyunu bitirdin!")
+                return
+        
+        # Sonraki world/level'i yükle
+        self.level_complete = False
+        self.frame_count = 0
+        self._initialize_game()
+        print(f"Yeni level: World {self.current_world}-{self.current_level}")
     
     def _restart_game(self):
         """Oyunu yeniden başlat"""
@@ -346,6 +397,7 @@ class Game:
         self.level_complete = False
         self.all_levels_complete = False
         self.frame_count = 0
+        self.current_world = 1
         self.current_level = 1
         self.player = None  # Player'ı sıfırla
         self._initialize_game()

@@ -2,8 +2,8 @@
 Level yapısı ve level builder
 """
 from objects import *
-from enemies import Goomba, Koopa
-from powers import PowerUp, PowerUpType
+from enemies import Goomba, Koopa, PiranhaPlant, BulletBill, Spiny, Lakitu
+from powers import PowerUp, PowerUpType, Mushroom, FireFlower, Star
 import importlib
 
 
@@ -23,14 +23,30 @@ class Level:
         self.theme = 'overworld'  # Level teması: 'overworld', 'underground', 'castle', vb.
         self.background_color = SKY_BLUE  # Arkaplan rengi
     
-    def load_level(self, level_number):
-        """Belirtilen seviyeyi yükle"""
-        # Seviye dosyasını import et
-        level_module = importlib.import_module(f'levels.level{level_number}')
-        level_data = level_module.LEVEL_DATA
+    def load_level(self, world_number=1, level_number=1):
+        """Belirtilen world ve seviyeyi yükle"""
+        # World ve level kontrolü
+        try:
+            # Yeni world sistemi: levels.worldX.levelY
+            level_module = importlib.import_module(f'levels.world{world_number}.level{level_number}')
+            level_data = level_module.LEVEL_DATA
+        except (ImportError, ModuleNotFoundError):
+            # Eğer bulunamazsa, eski sistemi dene (geriye dönük uyumluluk)
+            try:
+                level_module = importlib.import_module(f'levels.level{level_number}')
+                level_data = level_module.LEVEL_DATA
+            except (ImportError, ModuleNotFoundError):
+                print(f"World {world_number}, Level {level_number} bulunamadı! Varsayılan level yükleniyor.")
+                # Varsayılan basit level
+                level_data = [
+                    ('platform', 400, 528, 200, 32),
+                    ('question', 500, 400),
+                    ('goomba', 450, 496),
+                ]
+                level_module = None
         
         # Tema bilgisini yükle (varsa)
-        if hasattr(level_module, 'LEVEL_THEME'):
+        if level_module and hasattr(level_module, 'LEVEL_THEME'):
             self.theme = level_module.LEVEL_THEME
             self._apply_theme()
         else:
@@ -89,6 +105,22 @@ class Level:
             self.blocks.add(obj)
             self.platforms.add(obj)
             self.all_sprites.add(obj)
+        
+        elif obj_type == 'question_fireflower':
+            # Fire Flower içeren soru bloğu
+            obj = QuestionBlock(obj_data[1], obj_data[2], self.coins, self.all_sprites, 'fire_flower', self.powerups)
+            self.question_blocks.add(obj)
+            self.blocks.add(obj)
+            self.platforms.add(obj)
+            self.all_sprites.add(obj)
+        
+        elif obj_type == 'question_star':
+            # Star içeren soru bloğu
+            obj = QuestionBlock(obj_data[1], obj_data[2], self.coins, self.all_sprites, 'star', self.powerups)
+            self.question_blocks.add(obj)
+            self.blocks.add(obj)
+            self.platforms.add(obj)
+            self.all_sprites.add(obj)
             
         elif obj_type == 'brick':
             obj = Brick(obj_data[1], obj_data[2])
@@ -128,6 +160,33 @@ class Level:
             obj = Koopa(obj_data[1], obj_data[2], stationary=True)
             self.enemies.add(obj)
             self.all_sprites.add(obj)
+        
+        elif obj_type == 'piranha':
+            # Piranha Plant - boru yüksekliği opsiyonel
+            pipe_height = obj_data[3] if len(obj_data) > 3 else 64
+            obj = PiranhaPlant(obj_data[1], obj_data[2], pipe_height)
+            self.enemies.add(obj)
+            self.all_sprites.add(obj)
+        
+        elif obj_type == 'bullet_bill':
+            # Bullet Bill - yön opsiyonel (default: -1 sola)
+            direction = obj_data[3] if len(obj_data) > 3 else -1
+            obj = BulletBill(obj_data[1], obj_data[2], direction)
+            self.enemies.add(obj)
+            self.all_sprites.add(obj)
+        
+        elif obj_type == 'spiny':
+            # Spiny - stationary opsiyonel
+            stationary = obj_data[3] if len(obj_data) > 3 else False
+            obj = Spiny(obj_data[1], obj_data[2], stationary)
+            self.enemies.add(obj)
+            self.all_sprites.add(obj)
+        
+        elif obj_type == 'lakitu':
+            # Lakitu - player referansı gerekli (update sırasında verilecek)
+            obj = Lakitu(obj_data[1], obj_data[2], player_ref=None, enemy_group=self.enemies)
+            self.enemies.add(obj)
+            self.all_sprites.add(obj)
             
         elif obj_type == 'coin':
             obj = Coin(obj_data[1], obj_data[2])
@@ -136,19 +195,19 @@ class Level:
         
         elif obj_type == 'mushroom':
             # Super Mushroom
-            obj = PowerUp(obj_data[1], obj_data[2], PowerUpType.SUPER)
+            obj = Mushroom(obj_data[1], obj_data[2])
             self.powerups.add(obj)
             self.all_sprites.add(obj)
         
         elif obj_type == 'fireflower':
             # Fire Flower
-            obj = PowerUp(obj_data[1], obj_data[2], PowerUpType.FIRE)
+            obj = FireFlower(obj_data[1], obj_data[2])
             self.powerups.add(obj)
             self.all_sprites.add(obj)
         
         elif obj_type == 'star':
             # Star
-            obj = PowerUp(obj_data[1], obj_data[2], PowerUpType.STAR)
+            obj = Star(obj_data[1], obj_data[2])
             self.powerups.add(obj)
             self.all_sprites.add(obj)
     

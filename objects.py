@@ -68,8 +68,8 @@ class QuestionBlock(pygame.sprite.Sprite):
             if self.content_type == 'mushroom':
                 # Mantar spawn - vurulduğu yönün tersine hareket eder
                 if self.powerup_group is not None and self.all_sprites_group is not None:
-                    from powers import PowerUp, PowerUpType
-                    mushroom = PowerUp(self.rect.x, self.rect.y - 32, PowerUpType.SUPER)
+                    from powers import Mushroom
+                    mushroom = Mushroom(self.rect.x, self.rect.y - 32)
                     # Mario sağdan vurduysa mantar sola, soldan vurduysa sağa gitsin
                     mushroom.vel_x = -2 if player_direction > 0 else 2
                     mushroom.spawning = True  # Bloğun içinden çıkıyor
@@ -78,6 +78,28 @@ class QuestionBlock(pygame.sprite.Sprite):
                     mushroom.rect.y = self.rect.y  # Bloğun içinden başla
                     self.powerup_group.add(mushroom)
                     self.all_sprites_group.add(mushroom)
+            elif self.content_type == 'fire_flower':
+                # Fire Flower spawn
+                if self.powerup_group is not None and self.all_sprites_group is not None:
+                    from powers import FireFlower
+                    flower = FireFlower(self.rect.x, self.rect.y - 32)
+                    flower.spawning = True
+                    flower.spawn_target_y = self.rect.y - 32
+                    flower.spawn_start_y = self.rect.y
+                    flower.rect.y = self.rect.y
+                    self.powerup_group.add(flower)
+                    self.all_sprites_group.add(flower)
+            elif self.content_type == 'star':
+                # Star spawn
+                if self.powerup_group is not None and self.all_sprites_group is not None:
+                    from powers import Star
+                    star = Star(self.rect.x, self.rect.y - 32)
+                    star.spawning = True
+                    star.spawn_target_y = self.rect.y - 32
+                    star.spawn_start_y = self.rect.y
+                    star.rect.y = self.rect.y
+                    self.powerup_group.add(star)
+                    self.all_sprites_group.add(star)
             else:
                 # Coin spawn
                 if self.coin_group is not None and self.all_sprites_group is not None:
