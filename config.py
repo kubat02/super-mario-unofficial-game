@@ -1,0 +1,37 @@
+"""
+Oyun sabitleri ve ayarları
+"""
+
+# Ekran ayarları
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 600
+FPS = 60
+LEVEL_WIDTH = 6000
+
+# Fizik sabitleri
+GRAVITY = 0.8
+JUMP_STRENGTH = -16
+PLAYER_SPEED = 5
+ENEMY_SPEED = 2
+
+# Renkler
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+RED = (200, 0, 0)
+GREEN = (0, 200, 0)
+BLUE = (0, 100, 255)
+YELLOW = (255, 215, 0)
+BROWN = (139, 69, 19)
+SKY_BLUE = (135, 206, 250)
+BRICK_RED = (180, 40, 40)
+ORANGE = (255, 140, 0)
+GOLD = (255, 200, 0)
+SKIN = (255, 200, 150)
+
+# Puan değerleri
+COIN_SCORE = 100
+ENEMY_STOMP_SCORE = 200
+QUESTION_BLOCK_SCORE = 200
+
+# Oyun ayarları
+INITIAL_LIVES = 3
