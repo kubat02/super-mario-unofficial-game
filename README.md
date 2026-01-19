@@ -55,3 +55,9 @@ Kodda değişiklik yapmak istersen:
 ├── levels/          - Level dosyaları
 └── config.py        - Ayarlar
 ```
+
+## Lisans ve Notlar
+
+Bu proje MIT License altında lisanslanmıştır. Kodları kullanabilirsiniz ama lütfen credit verin.
+
+**Not:** Super Mario, Nintendo'nun tescilli markasıdır. Bu proje ticari olmayan, eğitim amaçlı bir fan projesidir.
