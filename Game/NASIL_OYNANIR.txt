@@ -1,0 +1,95 @@
+╔═══════════════════════════════════════════════════════════════╗
+║           SUPER MARIO BROS - PYTHON EDITION                   ║
+║                   NASIL OYNANIR?                              ║
+╚═══════════════════════════════════════════════════════════════╝
+
+📦 OYUNU BAŞLATMA
+═══════════════════
+1. "SuperMario.exe" dosyasına çift tıkla
+2. Oyun penceresi açılacak
+3. Eğlence başlasın!
+
+
+🎮 KONTROLLER
+═══════════════════
+↑ (Yukarı Ok)    : Zıpla
+← (Sol Ok)       : Sola git
+→ (Sağ Ok)       : Sağa git
+SPACE (Boşluk)   : Özel güç kullan (ateş topu at!)
+R tuşu           : Yeniden başlat (öldüğünde)
+ESC              : Oyundan çık
+
+
+✨ GÜÇLER (POWER-UPS)
+═══════════════════
+🍄 Super Mushroom (Mantar)
+   - Mario büyür (2 kat!)
+   - Bir kere hasar alınca küçülür (can kaybetmez)
+
+🔥 Fire Flower (Ateş Çiçeği)
+   - Ateş Mario olursun
+   - SPACE tuşu ile ateş topu at!
+   - Düşmanları yakar
+
+⭐ Star (Yıldız)
+   - 10 saniye yenilmezlik
+   - Düşmanlara dokunarak öldür
+
+
+👾 DÜŞMANLAR
+═══════════════════
+Goomba (Mantar)  : Sağ-sol hareket eder
+Koopa (Kaplumbağa): Daha hızlı hareket eder
+
+💡 İPUÇLARI:
+- Düşmanların üstüne basarak ez
+- Düşman üzerindeyken ↑ tuşuna basılı tut = EXTRA YÜKSEK ZIPLAMA!
+- Soru bloklarına alttan vur (zıplayarak)
+- Coinleri topla, puan kazan
+
+
+🎯 OYUN AMAÇI
+═══════════════════
+1. Her level sonundaki BAYRAĞA ulaş
+2. Tüm levelleri tamamla
+3. En yüksek skoru yap!
+
+
+⚠️ DİKKAT
+═══════════════════
+- Düşmanlara yandan çarpma (ölürsün!)
+- Boşluğa düşme
+- Güç yoksa tek vuruşta ölürsün
+- Güç varsa hasar alınca küçülürsün
+
+
+🏆 LEVEL SİSTEMİ
+═══════════════════
+- Level 1 → Level 2 → Level 3 → ...
+- Her level otomatik yüklenir
+- Tüm leveller tamamlandığında "ALL LEVELS COMPLETE!"
+
+
+💾 SİSTEM GEREKSİNİMLERİ
+═══════════════════
+- Windows 10/11
+- 100 MB boş alan
+- Herhangi bir ekran kartı
+- Python yüklemeye gerek yok!
+
+
+🐛 SORUN YAŞIYORSAN
+═══════════════════
+- Antivirüs yazılımını kapat
+- Windows Defender'dan izin ver
+- Oyunu yönetici olarak çalıştır
+
+
+📧 İLETİŞİM
+═══════════════════
+Oyunu beğendin mi? Arkadaşlarınla paylaş!
+
+
+═══════════════════════════════════════════════════════════════
+            İYİ OYUNLAR! HAVE FUN! 🎮🍄⭐
+═══════════════════════════════════════════════════════════════
