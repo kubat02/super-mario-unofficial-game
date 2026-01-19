@@ -1,10 +1,15 @@
 """
-Level 1 tasarımı
+Level 1 - World 1-1: Bahçeli Klasik Alan (Overworld)
+Mario'nun başlangıç macerası - yeşil tepeler, borular ve güneşli gökyüzü
 """
+
+# Level teması
+LEVEL_THEME = 'overworld'  # Klasik bahçe teması
 
 # Obje tipleri ve parametreleri:
 # - 'platform': (x, y, genişlik, yükseklik)
-# - 'question': (x, y) - soru bloğu
+# - 'question': (x, y) - soru bloğu (coin verir)
+# - 'question_mushroom': (x, y) - soru bloğu (MANTAR verir! Mantar çıkınca hareket eder!)
 # - 'brick': (x, y) - tuğla
 # - 'pipe': (x, y, yükseklik)
 # - 'goomba': (x, y) - normal düşman (hareket eder)
@@ -12,7 +17,7 @@ Level 1 tasarımı
 # - 'koopa': (x, y) - kaplumbağa düşman (hareket eder)
 # - 'koopa_stationary': (x, y) - yerinde duran kaplumbağa (sağ-sol sallanır)
 # - 'coin': (x, y) - altın
-# - 'mushroom': (x, y) - Super Mushroom (büyük Mario)
+# - 'mushroom': (x, y) - Super Mushroom (büyük Mario) - doğrudan yerleştirilmiş
 # - 'fireflower': (x, y) - Fire Flower (ateş Mario, SPACE ile ateş topu at!)
 # - 'star': (x, y) - Yıldız (10 saniye yenilmezlik)
 #
@@ -20,11 +25,12 @@ Level 1 tasarımı
 # 1. ↑ TUŞU: Zıplama + Düşman ezdiğinizde basılı tutarsanız daha yüksek zıplarsınız!
 # 2. SPACE TUŞU: Özel güç kullan (Fire Flower ile ateş topu at!)
 # 3. 'goomba_stationary' ve 'koopa_stationary' yerinde sağ-sol sallanan düşmanlar!
+# 4. 'question_mushroom': Soru bloğundan MANTAR çıkar! Mantar yerçekimi etkisiyle yere düşer ve hareket eder!
 
 
 LEVEL_DATA = [
-    # Başlangıç
-    ('question', 300, 350),
+    # Başlangıç - ilk mantar!
+    ('question_mushroom', 300, 350),  # İlk mantar burada!
     ('question', 332, 350),
     ('question', 364, 350),
     ('brick', 332, 250),
@@ -39,7 +45,7 @@ LEVEL_DATA = [
     ('coin', 980, 450),
     ('coin', 1010, 450),
     
-    ('question', 1100, 350),
+    ('question_mushroom', 1100, 350),  # Mantar burada!
     ('brick', 1132, 350),
     ('question', 1164, 350),
     ('brick', 1132, 250),
@@ -64,7 +70,7 @@ LEVEL_DATA = [
     
     # Soru blokları
     ('question', 2300, 350),
-    ('question', 2332, 300),
+    ('question_mushroom', 2332, 300),  # Mantar!
     ('question', 2364, 250),
     ('question', 2396, 300),
     ('question', 2428, 350),

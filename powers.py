@@ -21,11 +21,24 @@ class PowerUp:
         self.vel_y = 0
         self.vel_x = 2  # Güçler sağa doğru hareket eder
         self.collected = False
+        self.spawning = False  # Bloktan çıkış animasyonu
+        self.spawn_start_y = y
+        self.spawn_target_y = y - 32
         
     def update(self, platforms):
         """Güncelle"""
         if self.collected:
             return
+        
+        # Spawn animasyonu - bloktan yukarı çıkış
+        if self.spawning:
+            spawn_speed = 2
+            if self.rect.y > self.spawn_target_y:
+                self.rect.y -= spawn_speed
+            else:
+                self.rect.y = self.spawn_target_y
+                self.spawning = False
+            return  # Spawn sırasında yerçekimi yok
         
         # Yerçekimi
         self.vel_y += 0.5

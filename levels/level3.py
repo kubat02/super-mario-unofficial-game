@@ -1,7 +1,10 @@
 """
-Level 3 tasarımı
-Yapay zekaya bu seviyeyi oluşturmasını söyleyebilirsiniz
+Level 3 - World 1-3: Gökyüzü Köprüleri (Sky/Clouds)
+Yüksek platformlar ve bulutlar üzerinde atlama bölgesi
 """
+
+# Level teması
+LEVEL_THEME = 'overworld'  # Gökyüzü teması (overworld benzeri ama daha açık)
 
 # Obje tipleri ve parametreleri:
 # - 'platform': (x, y, genişlik, yükseklik)

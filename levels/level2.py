@@ -1,7 +1,10 @@
 """
-Level 2 tasarımı
-Yapay zekaya bu seviyeyi oluşturmasını söyleyebilirsiniz
+Level 2 - World 1-2: Yeraltı Mağarası (Underground)
+Karanlık yeraltı tünelleri - alçak tavanlar ve sıkışık geçitler
 """
+
+# Level teması
+LEVEL_THEME = 'underground'  # Yeraltı teması
 
 # Obje tipleri ve parametreleri:
 # - 'platform': (x, y, genişlik, yükseklik)

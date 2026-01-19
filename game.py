@@ -189,7 +189,7 @@ class Game:
                             continue
                         else:
                             # Hareket eden kabuğa çarptı - hasar al
-                            self.player.die()
+                            self.player.take_damage()
                             if self.player.lives <= 0:
                                 self.game_over = True
                             continue
@@ -218,8 +218,8 @@ class Game:
                         else:
                             self.player.vel_y = -10
                 else:
-                    # Çarpışma - can kaybı
-                    self.player.die()
+                    # Çarpışma - hasar al
+                    self.player.take_damage()
                     if self.player.lives <= 0:
                         self.game_over = True
         
@@ -241,14 +241,16 @@ class Game:
     
     def _render(self):
         """Ekrana çiz"""
-        self.screen.fill(SKY_BLUE)
+        # Level temasına göre arkaplan
+        self.screen.fill(self.level.background_color)
         
         # Tüm sprite'ları çiz
         for sprite in self.level.all_sprites:
             self.screen.blit(sprite.image, self.camera.apply(sprite))
         
-        # Player'ı çiz
-        self.screen.blit(self.player.image, self.camera.apply(self.player))
+        # Player'ı çiz (yanıp sönme efekti ile)
+        if self.player.should_draw():
+            self.screen.blit(self.player.image, self.camera.apply(self.player))
         
         # Ateş toplarını çiz
         for fireball in self.player.fireballs:

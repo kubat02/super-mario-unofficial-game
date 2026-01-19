@@ -42,7 +42,7 @@ class Coin(pygame.sprite.Sprite):
 class QuestionBlock(pygame.sprite.Sprite):
     """Soru işareti bloğu"""
     
-    def __init__(self, x, y, coin_group=None, all_sprites_group=None):
+    def __init__(self, x, y, coin_group=None, all_sprites_group=None, content_type='coin', powerup_group=None):
         super().__init__()
         self.image = pygame.Surface((32, 32))
         self.rect = self.image.get_rect()
@@ -52,21 +52,38 @@ class QuestionBlock(pygame.sprite.Sprite):
         self.frame = 0
         self.coin_group = coin_group
         self.all_sprites_group = all_sprites_group
+        self.content_type = content_type  # 'coin' veya 'mushroom'
+        self.powerup_group = powerup_group
         
     def update(self):
         self.frame += 1
         self.image.fill((0, 0, 0, 0))
         draw_question_block(self.image, 0, 0, self.frame, self.active)
     
-    def hit(self):
+    def hit(self, player_direction=1):
         """Bloğa vuruldu"""
         if self.active:
             self.active = False
-            # Coin spawn
-            if self.coin_group is not None and self.all_sprites_group is not None:
-                coin = Coin(self.rect.x, self.rect.y - 40)
-                self.coin_group.add(coin)
-                self.all_sprites_group.add(coin)
+            
+            if self.content_type == 'mushroom':
+                # Mantar spawn - vurulduğu yönün tersine hareket eder
+                if self.powerup_group is not None and self.all_sprites_group is not None:
+                    from powers import PowerUp, PowerUpType
+                    mushroom = PowerUp(self.rect.x, self.rect.y - 32, PowerUpType.SUPER)
+                    # Mario sağdan vurduysa mantar sola, soldan vurduysa sağa gitsin
+                    mushroom.vel_x = -2 if player_direction > 0 else 2
+                    mushroom.spawning = True  # Bloğun içinden çıkıyor
+                    mushroom.spawn_target_y = self.rect.y - 32  # Hedef Y pozisyonu
+                    mushroom.spawn_start_y = self.rect.y  # Başlangıç Y (bloğun içinde)
+                    mushroom.rect.y = self.rect.y  # Bloğun içinden başla
+                    self.powerup_group.add(mushroom)
+                    self.all_sprites_group.add(mushroom)
+            else:
+                # Coin spawn
+                if self.coin_group is not None and self.all_sprites_group is not None:
+                    coin = Coin(self.rect.x, self.rect.y - 40)
+                    self.coin_group.add(coin)
+                    self.all_sprites_group.add(coin)
             return True
         return False
 

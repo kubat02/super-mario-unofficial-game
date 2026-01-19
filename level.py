@@ -20,12 +20,22 @@ class Level:
         self.powerups = pygame.sprite.Group()  # Güç objeleri
         self.all_sprites = pygame.sprite.Group()
         self.flag = None
+        self.theme = 'overworld'  # Level teması: 'overworld', 'underground', 'castle', vb.
+        self.background_color = SKY_BLUE  # Arkaplan rengi
     
     def load_level(self, level_number):
         """Belirtilen seviyeyi yükle"""
         # Seviye dosyasını import et
         level_module = importlib.import_module(f'levels.level{level_number}')
         level_data = level_module.LEVEL_DATA
+        
+        # Tema bilgisini yükle (varsa)
+        if hasattr(level_module, 'LEVEL_THEME'):
+            self.theme = level_module.LEVEL_THEME
+            self._apply_theme()
+        else:
+            self.theme = 'overworld'
+            self.background_color = SKY_BLUE
         
         # Zemin oluştur
         for i in range(0, LEVEL_WIDTH, 32):
@@ -40,6 +50,17 @@ class Level:
         # Bayrak
         self.flag = Flag(5700, 240)
         self.all_sprites.add(self.flag)
+    
+    def _apply_theme(self):
+        """Temaya göre arkaplan rengini ayarla"""
+        theme_colors = {
+            'overworld': SKY_BLUE,  # Bahçe/dış mekan - klasik mavi gökyüzü
+            'underground': (20, 20, 20),  # Yeraltı - karanlık
+            'underwater': (0, 50, 100),  # Su altı - koyu mavi
+            'castle': (40, 20, 20),  # Kale - karanlık kırmızımsı
+            'snow': (200, 220, 255),  # Kar - açık mavi-beyaz
+        }
+        self.background_color = theme_colors.get(self.theme, SKY_BLUE)
         
     def build_level_1(self):
         """Level 1'i oluştur - geriye dönük uyumluluk için"""
@@ -55,7 +76,15 @@ class Level:
             self.all_sprites.add(obj)
             
         elif obj_type == 'question':
-            obj = QuestionBlock(obj_data[1], obj_data[2], self.coins, self.all_sprites)
+            obj = QuestionBlock(obj_data[1], obj_data[2], self.coins, self.all_sprites, 'coin', self.powerups)
+            self.question_blocks.add(obj)
+            self.blocks.add(obj)
+            self.platforms.add(obj)
+            self.all_sprites.add(obj)
+        
+        elif obj_type == 'question_mushroom':
+            # Mantar içeren soru bloğu
+            obj = QuestionBlock(obj_data[1], obj_data[2], self.coins, self.all_sprites, 'mushroom', self.powerups)
             self.question_blocks.add(obj)
             self.blocks.add(obj)
             self.platforms.add(obj)

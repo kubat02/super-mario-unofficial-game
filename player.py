@@ -25,15 +25,23 @@ class Player(pygame.sprite.Sprite):
         self.frame = 0
         self.is_moving = False
         self.fly_mode = False  # Developer uçma modu
-        self.power_state = PlayerPowerState()  # Güç durumu
+        self.power_state = PlayerPowerState()  # Güç durumu - başlangıçta küçük
         self.fireballs = pygame.sprite.Group()  # Ateş topları
         self.combo_count = 0  # Düşman ezme kombosu
         self.combo_timer = 0  # Kombo süresi
+        self.is_dying = False  # Ölüm animasyonu
+        self.death_jump_vel = 0  # Ölüm zıplaması
+        self.invincibility_timer = 0  # Hasar sonrası yanıp sönme
         self._update_size()  # Boyutu güç durumuna göre ayarla
         
     def update(self, platforms, enemies, coins, blocks, level_width):
         """Her frame'de güncelle"""
         keys = pygame.key.get_pressed()
+        
+        # Ölüm animasyonu aktifse sadece onu oynat
+        if self.is_dying:
+            self._update_death_animation()
+            return
         
         # Güç durumunu güncelle
         self.power_state.update()
@@ -46,6 +54,10 @@ class Player(pygame.sprite.Sprite):
             self.combo_timer -= 1
         else:
             self.combo_count = 0  # Süre doldu, komboyu sıfırla
+        
+        # Yanıp sönme timer
+        if self.invincibility_timer > 0:
+            self.invincibility_timer -= 1
         
         # Uçma modunda özel kontroller
         if self.fly_mode:
@@ -187,21 +199,30 @@ class Player(pygame.sprite.Sprite):
         # Eğer güç değiştiyse boyutu güncelle
         if old_power != self.power_state.current_power or self.power_state.star_timer > 0:
             self._update_size()
-            
-    def die(self):
-        """Öldü"""
-        # Güç varsa sadece güç kaybet
-        if not self.power_state.take_damage():
-            # Can kaybetmedi, sadece güç kaybetti
-            self._update_size()  # Boyutu küçült
+    
+    def take_damage(self):
+        """Hasar al (düşman çarpması)"""
+        # Zaten ölüyorsa veya yanıp sönüyorsa hasar alma
+        if self.is_dying or self.invincibility_timer > 0:
             return
         
-        # Gerçekten can kaybı
+        # Güç varsa sadece güç kaybet
+        if not self.power_state.take_damage():
+            # Can kaybetmedi, sadece güç kaybetti - küçüldü
+            self._update_size()  # Boyutu küçült
+            self.invincibility_timer = 120  # 2 saniye yanıp sönme
+            return
+        
+        # Gerçekten can kaybı - ölüm animasyonu başlat
+        self.die()
+            
+    def die(self):
+        """Öldü - Mario tarzı ölüm animasyonu"""
         self.lives -= 1
-        self.rect.x = 100
-        self.rect.y = 100
-        self.vel_y = 0
+        self.is_dying = True
+        self.death_jump_vel = -12  # Yukarı zıpla
         self.vel_x = 0
+        self.vel_y = 0
     
     def add_score(self, points):
         """Skor ekle"""
@@ -255,7 +276,7 @@ class Player(pygame.sprite.Sprite):
                 elif self.vel_y < 0 and overlap_bottom < overlap_top:
                     # Alttan vurdu
                     if hasattr(block, 'hit'):
-                        result = block.hit()
+                        result = block.hit(self.direction)  # Mario'nun yönünü gönder
                         if result:
                             self.add_score(QUESTION_BLOCK_SCORE)
                     self.rect.top = block.rect.bottom
@@ -273,3 +294,30 @@ class Player(pygame.sprite.Sprite):
                 elif self.vel_y < 0:
                     self.rect.top = platform.rect.bottom
                     self.vel_y = 0
+    
+    def _update_death_animation(self):
+        """Mario tarzı ölüm animasyonu - yukarı zıplayıp aşağı düşme"""
+        # Yukarı zıpla
+        self.rect.y += self.death_jump_vel
+        self.death_jump_vel += GRAVITY * 0.8  # Yerçekimi
+        
+        # Ekrandan çıktıysa animasyon bitti
+        if self.rect.top > SCREEN_HEIGHT:
+            self.is_dying = False
+            # Respawn
+            self.rect.x = 100
+            self.rect.y = 100
+            self.vel_y = 0
+            self.vel_x = 0
+            self.power_state.current_power = 0  # Küçük Mario'ya dön
+            self._update_size()
+            self.invincibility_timer = 180  # 3 saniye koruma
+    
+    def should_draw(self):
+        """Yanıp sönme efekti için çizilmeli mi?"""
+        if self.is_dying:
+            return True  # Ölürken her zaman çiz
+        if self.invincibility_timer > 0:
+            # Yanıp sönme efekti
+            return (self.invincibility_timer // 5) % 2 == 0
+        return True
