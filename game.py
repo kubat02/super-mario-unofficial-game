@@ -160,19 +160,63 @@ class Game:
         keys = pygame.key.get_pressed()
         for enemy in enemy_hits:
             if enemy.alive:
+                # Koopa kabuğu kontrolü
+                if hasattr(enemy, 'in_shell') and enemy.in_shell:
+                    # Hareketsiz kabuk - tekmeleme
+                    if not enemy.shell_moving:
+                        # Sağdan mı soldan mı vurduk?
+                        if self.player.rect.centerx < enemy.rect.centerx:
+                            enemy.kick_shell(1)  # Sağa tekmelendi
+                        else:
+                            enemy.kick_shell(-1)  # Sola tekmelendi
+                        self.player.add_score(100)
+                        continue
+                    # Hareket eden kabuk - çarpıldı
+                    elif enemy.shell_moving:
+                        # Yenilmezse veya üstten basarsa kabuğu durdur
+                        if self.player.power_state.is_invincible():
+                            enemy.shell_moving = False
+                            enemy.vel_x = 0
+                            continue
+                        elif self.player.vel_y > 0 and self.player.rect.bottom <= enemy.rect.centery:
+                            enemy.shell_moving = False
+                            enemy.vel_x = 0
+                            if keys[pygame.K_UP]:
+                                self.player.vel_y = -18
+                            else:
+                                self.player.vel_y = -10
+                            points = self.player.stomp_enemy(enemy)
+                            continue
+                        else:
+                            # Hareket eden kabuğa çarptı - hasar al
+                            self.player.die()
+                            if self.player.lives <= 0:
+                                self.game_over = True
+                            continue
+                
                 # Yenilmezse düşmanı direkt öldür
                 if self.player.power_state.is_invincible():
                     enemy.stomp()
                     self.player.add_score(ENEMY_STOMP_SCORE)
                 # Üstüne basma
                 elif self.player.vel_y > 0 and self.player.rect.bottom <= enemy.rect.centery:
-                    enemy.stomp()
-                    # Yukarı tuşuna basılıysa daha yüksek zıpla
-                    if keys[pygame.K_UP]:
-                        self.player.vel_y = -18  # Extra yüksek zıplama
+                    result = enemy.stomp()
+                    
+                    # Koopa kabuk oldu mu?
+                    if result == 'shell':
+                        points = self.player.stomp_enemy(enemy)
+                        # Yukarı tuşuna basılıysa daha yüksek zıpla
+                        if keys[pygame.K_UP]:
+                            self.player.vel_y = -18
+                        else:
+                            self.player.vel_y = -10
                     else:
-                        self.player.vel_y = -10  # Normal düşman ezme zıplaması
-                    self.player.add_score(ENEMY_STOMP_SCORE)
+                        # Normal düşman öldü
+                        points = self.player.stomp_enemy(enemy)
+                        if keys[pygame.K_UP]:
+                            self.player.vel_y = -18
+                        else:
+                            self.player.vel_y = -10
                 else:
                     # Çarpışma - can kaybı
                     self.player.die()

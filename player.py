@@ -27,6 +27,8 @@ class Player(pygame.sprite.Sprite):
         self.fly_mode = False  # Developer uçma modu
         self.power_state = PlayerPowerState()  # Güç durumu
         self.fireballs = pygame.sprite.Group()  # Ateş topları
+        self.combo_count = 0  # Düşman ezme kombosu
+        self.combo_timer = 0  # Kombo süresi
         self._update_size()  # Boyutu güç durumuna göre ayarla
         
     def update(self, platforms, enemies, coins, blocks, level_width):
@@ -38,6 +40,12 @@ class Player(pygame.sprite.Sprite):
         
         # Ateş toplarını güncelle
         self.fireballs.update(platforms)
+        
+        # Kombo timer azalt
+        if self.combo_timer > 0:
+            self.combo_timer -= 1
+        else:
+            self.combo_count = 0  # Süre doldu, komboyu sıfırla
         
         # Uçma modunda özel kontroller
         if self.fly_mode:
@@ -198,6 +206,20 @@ class Player(pygame.sprite.Sprite):
     def add_score(self, points):
         """Skor ekle"""
         self.score += points
+    
+    def stomp_enemy(self, enemy):
+        """Düşman ezildi - kombo sistemi"""
+        # Kombo sayacını artır
+        self.combo_count += 1
+        self.combo_timer = 60  # 1 saniye içinde yeni ezme olmazsa sıfırla
+        
+        # Kombo puanı (her ezme daha fazla puan)
+        combo_points = [100, 200, 400, 800, 1000, 2000, 4000, 8000]
+        points_index = min(self.combo_count - 1, len(combo_points) - 1)
+        points = combo_points[points_index]
+        
+        self.add_score(points)
+        return points  # Ekranda göstermek için
                     
     def _check_horizontal_collisions(self, platforms, blocks):
         """Yatay çarpışmaları kontrol et"""
