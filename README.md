@@ -1,26 +1,54 @@
-# Super Mario Bros - Python Edition
+# 🍄 Super Mario Bros - Python Edition
 
 Klasik Super Mario Bros oyununun Python/Pygame ile yapılmış versiyonu.
 
-## 📁 Proje Yapısı
+## 🎮 Hemen Oyna!
 
-```
-├── main.py           # Ana giriş noktası
-├── game.py           # Oyun döngüsü ve ana mantık
-├── player.py         # Mario karakteri
-├── enemies.py        # Düşman karakterleri (Goomba, Koopa)
-├── objects.py        # Platformlar, bloklar, coinler
-├── level.py          # Level yapısı ve builder
-├── camera.py         # Kamera sistemi
-├── renderer.py       # Çizim fonksiyonları
-└── config.py         # Sabitler ve ayarlar
-```
+### 💾 Windows İçin (Python Gerektirmez)
 
-## 🎮 Nasıl Çalıştırılır
+1. **[Releases](https://github.com/kubat02/super-mario-unofficial-game/releases)** sayfasına git
+2. En son **SuperMario.exe** dosyasını indir
+3. Çift tıkla ve oyna! 🎮
+
+### 🐍 Python ile Çalıştırma
 
 ```bash
+# Repository'yi klonla
+git clone https://github.com/kubat02/super-mario-unofficial-game.git
+cd super-mario-unofficial-game
+
+# Bağımlılıkları yükle
+pip install pygame
+
+# Oyunu başlat
 python main.py
 ```
+
+## ⭐ Özellikler
+
+### 🐢 Koopa Kabuğu Mekaniği
+- Koopa'yı ezince kabuk haline gelir
+- Kabuğa dokunarak tekmeleyip fırlatabilirsin
+- Kabuk düşmanları öldürür - SÜPER KOMBO!
+- Hareket eden kabuğa dikkat - can kaybedersin!
+
+### 🔥 Kombo Sistemi
+Art arda düşman ezince puan katlanıyor:
+- 1. düşman: **100 puan**
+- 2. düşman: **200 puan**
+- 3. düşman: **400 puan**
+- 8. düşman: **8000 puan!** 💰
+
+### 💪 Güç Sistemleri
+- **Super Mushroom** 🍄 - Büyük Mario
+- **Fire Flower** 🌸 - Ateş topu at (SPACE tuşu)
+- **Star** ⭐ - 10 saniye yenilmezlik
+
+### 🎯 Kontroller
+- **←/→**: Hareket
+- **↑**: Zıplama (düşman üstünde basılı tut = süper zıplama!)
+- **SPACE**: Özel güç (Fire Flower ile ateş topu)
+- **F**: Uçma modu (Developer)
 
 ## 🛠️ Geliştirme
 
